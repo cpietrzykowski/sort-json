@@ -1,0 +1,24 @@
+{
+  "name": "sort-json",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Simple utility to sort json by key.",
+  "main": "index.js",
+  "author": "Christopher Pietrzykowski",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "babel src -d .",
+    "dev": "babel-node src",
+    "start": "node index.js"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-preset-env": "^1.5.1",
+    "commander": "^2.9.0",
+    "eslint": "^3.19.0",
+    "jest": "^20.0.4",
+    "jsdoc": "^3.4.3"
+  }
+}
