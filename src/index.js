@@ -1,63 +1,80 @@
 import fs from 'fs';
 import { Command } from 'commander';
-const program = new Command()
-  .usage('<file>')
-  .parse(process.argv);
+const program = new Command().usage('<file>').parse(process.argv);
 
 /**
- * JSON.stringify replacer method
- * @method sortObject
- * @param  {*}        value input
+ * @param  {object}        value input
  * @param  {boolean}  deep  true if deep sort
- * @return {*}              sorted input or passthrough
+ * @return {object}              a new sorted object or passthrough
  */
-function sortObject(value, deep) {
+function sortObjectKeys(value, deep = false) {
   if (Object(value) === value) {
     if (!Array.isArray(value)) {
-      return Object.keys(value).sort(function(l, r) {
-        return l.localeCompare(r);
-      }).reduce(function(memo, k) {
-        memo[k] = value[k];
-        return memo;
-      }, {});
+      return Object.keys(value)
+        .sort(function(l, r) {
+          return l.localeCompare(r);
+        })
+        .reduce(function(memo, k) {
+          memo[k] = sortObjectKeys(value[k]);
+          return memo;
+        }, {});
     }
   }
 
   return value;
 }
 
-function sortJsonFile(path, keys) {
-  fs.readFile(path, function(err, data) {
-    if (err) throw err;
+/**
+ *
+ * @param {string} path
+ * @return {Promise} resolving with {string}
+ */
+function readJsonFile(path) {
+  return new Promise(function(resolve, reject) {
+    fs.readFile(path, function(err, data) {
+      if (err) return reject(err);
 
-    const obj = JSON.parse(data);
-    const sortedobj = Object.keys(obj).reduce(function(memo, k) {
-      if (keys.includes(k)) {
-        memo[k] = sortObject(obj[k], true);
-      } else {
-        memo[k] = obj[k];
+      try {
+        const jsonObject = JSON.parse(data);
+        return resolve(jsonObject);
+      } catch (reason) {
+        return reject(reason);
       }
-
-      return memo;
-    }, {});
-
-    // replace 'path' contents on disk
-    const json = JSON.stringify(sortedobj, null, 2) + '\n';
-    fs.writeFile(path, json, function(err) {
-      if (err) throw err;
     });
   });
 }
 
-const keystosort = ['dependencies', 'devDependencies'];
+/**
+ *
+ * @param {string} path
+ * @param {object} obj
+ * @return {Promise}
+ */
+function writeJsonToFile(path, obj) {
+  const json = JSON.stringify(obj, null, 2);
 
-if (program.args[0]) {
-  const jsonfile = program.args[0];
-  fs.access(jsonfile, fs.constants.R_OK | fs.constants.W_OK, function(err) {
-    console.log(err);
-    if (err) throw err;
-    sortJsonFile(jsonfile, keystosort);
+  return new Promise(function(resolve, reject) {
+    fs.writeFile(path, `${json}\n`, function(err) {
+      if (err) return reject(err);
+      return resolve();
+    });
   });
+}
+
+// command line driver
+if (program.args[0]) {
+  const filePath = program.args[0];
+  readJsonFile(filePath)
+    .then(function(obj) {
+      // process object (sorting keys)
+      return sortObjectKeys(obj);
+    })
+    .then(function(obj) {
+      return writeJsonToFile(filePath, obj);
+    })
+    .then(function() {
+      console.info(`finished sorting: ${filePath}`);
+    });
 } else {
   program.outputHelp(function(help) {
     return help;

@@ -1,24 +1,29 @@
 {
-  "name": "sort-json",
-  "private": true,
-  "version": "0.0.0",
-  "description": "Simple utility to sort json by key.",
-  "main": "index.js",
   "author": "Christopher Pietrzykowski",
-  "license": "UNLICENSED",
-  "scripts": {
-    "build": "babel src -d .",
-    "dev": "babel-node src",
-    "start": "node index.js"
+  "dependencies": {
+    "commander": "^2.9.0"
   },
+  "description": "Simple utility to sort json by key.",
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
-    "babel-eslint": "^7.2.3",
+    "babel-eslint": "^8.2.1",
     "babel-preset-env": "^1.5.1",
-    "commander": "^2.9.0",
-    "eslint": "^3.19.0",
-    "jest": "^20.0.4",
+    "babel-preset-stage-1": "^6.24.1",
+    "eslint": "^4.17.0",
+    "eslint-config-google": "^0.9.1",
+    "jest": "^22.2.2",
     "jsdoc": "^3.4.3"
-  }
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "name": "sort-json",
+  "private": true,
+  "scripts": {
+    "build": "babel --source-maps true --minified --no-comments --out-dir ./dist/sort-json ./src",
+    "dev": "babel-node ./src",
+    "start": "node ./dist/sort-json",
+    "test": "jest"
+  },
+  "version": "0.0.0"
 }
